@@ -1,10 +1,10 @@
 TARGET_BINARY=eem_solver_proteins
-COMPILER_BINARY=/usr/bin/gcc
+CC=gcc
 
 all: solver
 
 solver: eem_solver_proteins.c
-	${COMPILER_BINARY} -o ${TARGET_BINARY} eem_solver_proteins.c -lm
+	${CC} -o ${TARGET_BINARY} eem_solver_proteins.c -lm 2>&1 1>/dev/null
 
 clean:
 	-rm ${TARGET_BINARY}
