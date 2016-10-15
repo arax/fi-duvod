@@ -13,7 +13,7 @@
 #--------------------------------------------------------------------------- #
 
 cd "$SOLVER_DIR"
-for MOLECULE in $(ls *.mol); do
+for MOLECULE in $(ls data/*.mol); do
 	SOLVER_CMD="${SOLVER_DIR}/eem_solver_proteins ${SOLVER_DIR}/${MOLECULE} ${SOLVER_DIR}/params_out.txt 0 2>&1 1>/dev/null"
 	eval "time ${SOLVER_CMD}"
 done
