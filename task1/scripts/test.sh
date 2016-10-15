@@ -12,8 +12,14 @@
 # limitations under the License.                                             #
 #--------------------------------------------------------------------------- #
 
+TEST_RUNS=20
+
 cd "$SOLVER_DIR"
-for MOLECULE in $(ls data/*.mol); do
-	SOLVER_CMD="${SOLVER_DIR}/eem_solver_proteins ${SOLVER_DIR}/${MOLECULE} ${SOLVER_DIR}/params_out.txt 0 2>&1 1>/dev/null"
-	eval "time ${SOLVER_CMD}"
+for MOLECULE in $(ls ./data/*.mol); do
+	SOLVER_CMD="./eem_solver_proteins ${SOLVER_DIR}${MOLECULE} ${SOLVER_DIR}params_out.txt 0 2>&1 1>/dev/null"
+
+	MOLECULE=${MOLECULE%.mol}
+	for RUN in $(seq 1 $TEST_RUNS); do
+		eval "/usr/bin/time -o ${REPORT_DIR}${MOLECULE##*/} -a -f \"%E\" ${SOLVER_CMD}"
+	done
 done

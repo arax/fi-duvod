@@ -28,5 +28,8 @@ REPORT_DIR="${SCRIPT_DIR}/../report/"
 # Test
 . ${SCRIPT_DIR}/test.sh
 
+# Print results
+. ${SCRIPT_DIR}/print.sh
+
 # Clean-up
 . ${SCRIPT_DIR}/clean.sh

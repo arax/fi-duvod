@@ -12,9 +12,11 @@
 # limitations under the License.                                             #
 #--------------------------------------------------------------------------- #
 
-cd "$SOLVER_DIR"
-"$MAKE_PATH" clean 2>&1 1>/dev/null
-
-if [ "$(ls -A $REPORT_DIR)" ]; then
-	rm -rf "${REPORT_DIR}*"
-fi
+cd "$REPORT_DIR"
+for RESULT in $(ls "$REPORT_DIR"); do
+	printf "${RESULT}: "
+	for LINE in $(cat $RESULT); do
+		printf "$LINE\t"
+	done
+	printf "\n"
+done
