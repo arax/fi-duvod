@@ -20,6 +20,9 @@ for MOLECULE in $(ls ./data/*.mol); do
 
 	MOLECULE=${MOLECULE%.mol}
 	for RUN in $(seq 1 $TEST_RUNS); do
-		eval "/usr/bin/time -o ${REPORT_DIR}${MOLECULE##*/} -a -f \"%E\" ${SOLVER_CMD}"
+		ts=$(date +%s%N)
+		eval "$SOLVER_CMD"
+		tt=$((($(date +%s%N) - $ts)/1000000))
+		echo "$tt" >> "${REPORT_DIR}${MOLECULE##*/}"
 	done
 done
