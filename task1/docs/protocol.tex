@@ -1,0 +1,79 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{cmap}
+\usepackage[english]{babel}
+
+\newcommand{\protocol}{Solver performance measurement}
+\newcommand{\labtitle}{DUVOD @ FI MU}
+\newcommand{\authorname}{Boris Parák}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{graphicx, float, array}
+\usepackage{amsmath, amssymb}
+\usepackage[margin=1in]{geometry}
+\usepackage{fancyhdr, lastpage, extramarks, booktabs}
+
+\usepackage[pdftitle={\protocol}, pdfauthor={\authorname}]{hyperref}
+\hypersetup{colorlinks, citecolor=blue, filecolor=blue, linkcolor=black, urlcolor=blue}
+\usepackage{cite}
+
+\newcommand{\checkbox}{$\square$\hspace{1mm}}
+\newcommand{\icb}{\item \checkbox}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\lhead{\normalfont\bfseries\firstleftmark}
+\chead{}
+\rhead{\protocol}
+\lfoot{}
+\cfoot{}
+\rfoot{Page\ \thepage\ of\ \protect\pageref*{LastPage}}
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\newcolumntype{C}[1]{>{\centering}p{#1}}
+
+\newcommand{\up}[1]{\textsuperscript{#1}}
+\setlength{\parindent}{0pt}
+\newcommand{\tab}{\hspace*{2em}}
+\setcounter{secnumdepth}{5}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+{\LARGE \textbf{Protocol: \protocol} \\ \vspace{4pt}}
+\rule[13pt]{\textwidth}{1pt} \\ \vspace{150pt}
+{\large \authorname \\ \vspace{10pt}
+{\large \textsc{\labtitle} \\ \vspace{10pt}}
+\today}
+\end{center}
+\end{titlepage}
+
+\newpage
+\thispagestyle{empty}
+\tableofcontents
+\clearpage
+
+\setcounter{page}{1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Protocol}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Appendix}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
