@@ -4,16 +4,17 @@
 #
 #
 
+require 'fileutils'
+
 RESULTS_FILE = 'data/solver-perf.results'.freeze
 DATA_FILE = 'data/solver-perf-%%MOL%%.data'.freeze
 PLOT_FILE_TPL = 'data/gnuplot_histogram.gnu'.freeze
 
-DATA_SEPARATOR = "\t"
-HEADER_SEPARATOR = ':'
-HEADER_FORMAT = /(?<prefix>.+)_(?<size>\d+)/
+DATA_SEPARATOR = "\t".freeze
+HEADER_SEPARATOR = ':'.freeze
 
 def generate_plot(data_line)
-  return if data_line.nil? || data_line.empty?
+  raise 'Found empty data line!' if data_line.nil? || data_line.empty?
   data = generate_plot_data(*data_line.split(HEADER_SEPARATOR))
 
   plot_template = File.read(PLOT_FILE_TPL)
@@ -31,14 +32,14 @@ def generate_plot(data_line)
   end
 
   `gnuplot #{output_gnuplot_file}`
-  `rm #{output_gnuplot_file}`
-  `rm #{data[:path]}`
+
+  FileUtils.rm output_gnuplot_file
+  FileUtils.rm data[:path]
 end
 
 def generate_plot_data(header, line)
   count = 1
-  ymax = 0
-  ymin = 0
+  ymax = ymin = 0
 
   of = File.open(DATA_FILE.gsub('%%MOL%%', header.strip), 'w')
   line.strip.split(DATA_SEPARATOR).each do |point|
@@ -58,8 +59,8 @@ end
 ## Main
 ##########################
 
-exit 1 unless File.readable?(RESULTS_FILE)
-exit 2 unless File.readable?(PLOT_FILE_TPL)
+raise "#{RESULTS_FILE} is not readable!" unless File.readable?(RESULTS_FILE)
+raise "#{PLOT_FILE_TPL} is not readable!" unless File.readable?(PLOT_FILE_TPL)
 
 File.open(RESULTS_FILE, 'r') do |data_file|
   data_file.each_line { |data_line| generate_plot(data_line) }
