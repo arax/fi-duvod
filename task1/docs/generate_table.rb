@@ -16,14 +16,13 @@ MEASUREMENTS_PER_LINE = 20
 
 TEX_TABLE_TPL = %q!
 \begin{center}
-  \begin{tabular}{ | l | r | }
+  \begin{tabular}{ | l | c | }
     \hline
     \textbf{Molecule size} & \textbf{Time in [ms] (p = 0.68)} \\\ \hline
     \hline
     <% lines.each do |line| %>
-    <%= [line[0], "#{line[1]} #{line[2]}"].join(' & ') %> \\\ \hline
+    <%= [line[0], "#{'%.2f' % line[1]} $\\\pm$ #{'%.2f' % line[2]}"].join(' & ') %> \\\ \hline
     <% end %>
-\hline
   \end{tabular}
 \end{center}
 
@@ -97,8 +96,8 @@ def calculate_line(data_line)
   corr_std_dev_avg_99 = std_dev_avg * CORR_MAP[MEASUREMENTS_PER_LINE - 1][99]
 
   result[1] = avg.round(2)
-  result[2] = "± #{corr_std_dev_avg_68.round(2)}"
-  result[3] = "± #{corr_std_dev_avg_99.round(2)}"
+  result[2] = corr_std_dev_avg_68.round(2)
+  result[3] = corr_std_dev_avg_99.round(2)
 
   result
 end
