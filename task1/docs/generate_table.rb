@@ -14,20 +14,36 @@ HEADER_SEPARATOR = ':'.freeze
 HEADER_FORMAT = /(?<prefix>.+)_(?<size>\d+)/
 MEASUREMENTS_PER_LINE = 20
 
-TABLE_TPL = %q!
+TEX_TABLE_TPL = %q!
 \begin{center}
-  \begin{tabular}{ | l | r | r | }
+  \begin{tabular}{ | l | r | }
     \hline
-    \textbf{Molecule size} & \textbf{Time in [ms] (p = 0.68)} & \textbf{Time in [ms] (p = 0.99)} \\\ \hline
+    \textbf{Molecule size} & \textbf{Time in [ms] (p = 0.68)} \\\ \hline
     \hline
     <% lines.each do |line| %>
-    <%= line.join(' & ') %> \\\ \hline
+    <%= [line[0], "#{line[1]} #{line[2]}"].join(' & ') %> \\\ \hline
     <% end %>
-    \hline
+\hline
   \end{tabular}
 \end{center}
 
 !.freeze
+
+PLAIN_TABLE_TPL = %q!
+#<%= %w(MSize Time[ms]).join("\t") %>
+<%= "\n" %>
+<% lines.each do |line| %>
+<%= [line[0], line[1]].join("\t") %>
+<%= "\n" %>
+<% end %>
+
+!
+
+R_TABLE_TPL = %q!
+Size = c(<%= lines.collect { |i| i[0] }.join(", ") %>)
+Time = c(<%= lines.collect { |i| i[1] }.join(", ") %>)
+
+!
 
 # Fake table (TODO: fix!)
 CORR_MAP = {
@@ -39,7 +55,19 @@ CORR_MAP = {
 
 def generate_table(data_file)
   lines = calculate_lines(data_file)
-  template = ERB.new(TABLE_TPL)
+
+  tpl_type =  case ARGV[0]
+              when 'latex', 'tex'
+                TEX_TABLE_TPL
+              when 'r'
+                R_TABLE_TPL
+              when 'plain', 'gnuplot', '', nil
+                PLAIN_TABLE_TPL
+              else
+                raise "Unknown output type #{ARGV[0].inspect}!"
+              end
+
+  template = ERB.new(tpl_type, 3, '>')
   template.result(binding)
 end
 
@@ -68,8 +96,9 @@ def calculate_line(data_line)
   corr_std_dev_avg_68 = std_dev_avg * CORR_MAP[MEASUREMENTS_PER_LINE - 1][68]
   corr_std_dev_avg_99 = std_dev_avg * CORR_MAP[MEASUREMENTS_PER_LINE - 1][99]
 
-  result[1] = "#{avg.round(2)} ± #{corr_std_dev_avg_68.round(2)}"
-  result[2] = "#{avg.round(2)} ± #{corr_std_dev_avg_99.round(2)}"
+  result[1] = avg.round(2)
+  result[2] = "± #{corr_std_dev_avg_68.round(2)}"
+  result[3] = "± #{corr_std_dev_avg_99.round(2)}"
 
   result
 end
