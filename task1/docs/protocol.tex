@@ -4,6 +4,8 @@
 \usepackage[T1]{fontenc}
 \usepackage{cmap}
 \usepackage[english]{babel}
+\usepackage[labelfont=bf]{caption}
+\usepackage{bm}
 
 \newcommand{\protocol}{Solver performance measurement}
 \newcommand{\labtitle}{DUVOD @ FI MU}
@@ -64,11 +66,69 @@
 \section{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\subsection{Task}
+\label{subsec:task}
+\begin{enumerate}
+    \item Evaluate the behavior of the given \textit{EEM solver} implementation
+          on the provided set of molecular data.
+    \item Provide experimental verification of its time complexity and compare it
+          with the theoretical expectation of $\mathcal{O}(n^3)$.
+    \item Compile a measurement protocol containing relevant data and conclusions.
+\end{enumerate}
+
+\subsection{Inputs}
+\label{sebsec:inputs}
+\begin{enumerate}
+    \item Solver sources at \url{http://arwen.ics.muni.cz/\~hopet/tmp/solver.tgz}
+    \item Sample molecule files (included in the solver package, \textit{*.mol} files)
+    \item Default solver parameters (included in the solver package, \textit{params\_out.txt})
+\end{enumerate}
+
+\subsection{Methodology}
+Measurements are performed by compiling the provided sources, executing the resulting
+solver binary 20 times per given input data file, and processing
+the measured values. The measured values are evaluated for gross, systematic, and random
+errors. Using the least square regression method, a model is computed for polynomials of
+increasing orders. The resulting models are compared using the coefficient of determination.
+The best-fitting model is used to form a conclusion with regards to the task in
+Section~\ref{subsec:task}.
+
+\hfill \\
+Every measurement is performed without solver source code modification using \textit{shell}
+scripting and the \textit{date} utility from the \textit{coreutils} package. Time is recorded
+in nanoseconds of Epoch time, solver is executed, time difference is calculated and converted
+to milliseconds. Based on experimental results, milliseconds were judged to be an acceptable
+level of granularity for the purposes of this protocol.
+
 \pagebreak
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Protocol}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Measurements}
+
+EEM solver is provided in the form of source code written in the C programming language.
+The provided package does not contain build instructions or standard automation instrumentation,
+no \textit{configure} script or \textit{Makefile}.
+
+\hfill \\
+In order to ensure reasonable repeatability and reproducibility of
+results, a \textit{Docker} container image `arax/solver-perf' is provided, see Appendix~\ref{subsubsec:docker}.
+It is based on an official \textit{GCC v6.2.0} container image and contains minimalistic
+changes required to build the solver, run measurements in an automated fashion, and
+output results. For instructions on how to use it and its output format, see the referenced
+public image repository.
+
+\hfill \\
+Measurements used in this protocol were obtained using hardware described in Appendix~\ref{subsec:ref_hw}.
+For the purposes of this protocol, it is considered to be the reference hardware configuration.
+
+\subsection{Results}
+
+Processed results of performed measurements are available in Table~\ref{tbl:results}.
+For raw results and additional information on processing techniques, see Appendix~\ref{subsubsec:sources}
+and \ref{subsec:histo}.
 
 \begin{center}
   \begin{tabular}{ | c | c | }
@@ -86,24 +146,43 @@
         1557 & 7844.40 $\pm$ 16.18 \\ \hline
         1965 & 16175.65 $\pm$ 128.85 \\ \hline
   \end{tabular}
+  \captionof{table}{Measurement results for the sample dataset of 10 molecules.}
+  \label{tbl:results}
 \end{center}
 
-\begin{figure}[!h]
-  \centering
-    \includegraphics[width=0.8\textwidth]{images/solver-perf-model.png}
-  \caption{Plot overlaying measured data with Model 1 and Model 2 (quadratic).}
-\end{figure}
+Based on processed results, the R language and processing environment were used to compute
+model candidates. The best-fitting model was chosen based on $R^2$ calculations show in
+Table~\ref{tbl:r_squared}, as the cubic polynomial model. Model $n^4$ does not show
+a significant improvement.
 
 \begin{center}
   \begin{tabular}{ | c | c | }
     \hline
-    \textbf{Model complexity} & \textbf{Coefficient of Determination ($R^2$)} \\ \hline
+    \textbf{Model complexity} & $\bm{R^2}$ \\ \hline
     \hline
         $\mathcal{O}(n^2)$ & 0.9941 \\ \hline
         $\mathcal{O}(n^3)$ & 1 \\ \hline
         $\mathcal{O}(n^4)$ & 1 \\ \hline
   \end{tabular}
+  \captionof{table}{Coefficient of Determination values for examined models.}
+  \label{tbl:r_squared}
 \end{center}
+
+The chosen cubic polynomial model was verified by creating an overlay with experimental
+data shown in Figure~\ref{fig:overlay}. The cubic polynomial model is a satisfactory
+fit, corroborating estimates in Table~\ref{tbl:r_squared}.
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{images/solver-perf-model.png}
+  \caption{Plot overlaying measured data points with the computed model.}
+  \label{fig:overlay}
+\end{figure}
+
+\subsection{Conclusion}
+Experimental data obtained from measurements and its computed model
+corroborate the initial theoretical hypothesis. Based on the provided data samples,
+the time complexity of the solver matches the expectation of $\mathcal{O}(n^3)$.
 
 \pagebreak
 
@@ -111,7 +190,11 @@
 \section{Appendix}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Hardware}
+\subsection{Reference Hardware}
+\label{subsec:ref_hw}
+
+All measurements were performed on a machine matching the description below.
+No specialized hardware was used.
 
 \begin{description}
     \item[Machine] \hfill \\
@@ -141,12 +224,14 @@
 \end{description}
 
 \subsection{Tools}
+\label{subsec:tools}
 
 The following software and scripts have been used to produce this protocol. Each description
 includes basic version information to aid reproducibility of the results.
 
-\subsubsection{Software}
+\subsubsection*{Software}
 \begin{itemize}
+    \item coreutils 8.21-1ubuntu5.4
     \item GNUPlot Version 4.6 patchlevel 4
     \item Ruby 2.2.4p230 (2015-12-16 revision 53155) [x86\_64-linux]
     \item R version 3.3.1 (2016-06-21)
@@ -154,15 +239,26 @@ includes basic version information to aid reproducibility of the results.
     \item Docker version 1.9.1, build a34a1d5
 \end{itemize}
 
-\subsubsection{Source Code}
+\subsubsection*{Source Code}
+\label{subsubsec:sources}
+\textit{Repository}: \url{https://github.com/arax/fi-duvod/tree/task1-final/task1}
 \begin{itemize}
-    \item Report -- \url{https://github.com/arax/fi-duvod/tree/task1-final/task1/docs}
-    \item Data -- \url{https://github.com/arax/fi-duvod/tree/task1-final/task1/docs/data}
-    \item Scripts -- \url{https://github.com/arax/fi-duvod/tree/task1-final/task1/scripts}
-    \item Solver -- \url{https://github.com/arax/fi-duvod/tree/task1-final/task1/src/solver}
+    \item Solver sources: \textbf{/src/solver}
+    \item Measurement instrumentation scripts: \textbf{/scripts}
+    \item Dockerfile for `arax/solver-perf': \textbf{Dockerfile}
+
+    \item R source files: \textbf{/docs/data/*.r}
+    \item Raw results: \textbf{/docs/data/solver-perf.results}
+    \item Scripts pre-processing results: \textbf{/docs/*.rb}
+    \item Processed results: \textbf{/docs/data/solver-perf-processed.results}
+
+    \item GNUPlot template files: \textbf{/docs/data/*.gnu}
+    \item Generated plots: \textbf{/docs/images/*.png}
+    \item Report: \textbf{/docs/protocol.tex}
 \end{itemize}
 
-\subsubsection{Docker Images}
+\subsubsection*{Docker Images}
+\label{subsubsec:docker}
 \begin{itemize}
     \item gcc:6.2.0 -- \url{https://hub.docker.com/_/gcc/}
     \item arax/solver-perf:30102016 -- \url{https://hub.docker.com/r/arax/solver-perf/}
@@ -171,7 +267,8 @@ includes basic version information to aid reproducibility of the results.
 
 \pagebreak
 
-\subsection{Histograms}
+\subsection{Measurement Histograms}
+\label{subsec:histo}
 
 \begin{figure}[!h]
   \centering
